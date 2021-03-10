@@ -209,7 +209,9 @@ impl Symbol {
     pub fn sync(&mut self, linked: Option<&mut SectionContent>, _: &Header) -> Result<(), Error> {
         match linked {
             Some(&mut SectionContent::Strtab(ref mut strtab)) => {
-                self._name = strtab.insert(&self.name) as u32;
+                // TODO: Optimize regular insert so it can be used here.
+                // Searching takes too long for many symbols.
+                self._name = strtab.insert_unchecked(&self.name) as u32;
             }
             any => return Err(Error::LinkedSectionIsNotStrtab{
                 during: "syncing symbols",

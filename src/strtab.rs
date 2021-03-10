@@ -41,18 +41,23 @@ impl Strtab {
 
     pub fn insert(&mut self, ns: &[u8]) -> usize {
         // If ns is already in our data, it takes up (ns.len() + 1) bytes.
-        // if let Some(max_start) = self.data.len().checked_sub(ns.len() + 1) {
-        //     for start in 0..=max_start {
-        //         // We first check for ns, then check for the null terminator.
-        //         if self.data[start..].starts_with(ns) {
-        //             if self.data[start + ns.len()] == 0 {
-        //                 return start;
-        //             }
-        //         }
-        //     }
-        // }
+        if let Some(max_start) = self.data.len().checked_sub(ns.len() + 1) {
+            for start in 0..=max_start {
+                // We first check for ns, then check for the null terminator.
+                if self.data[start..].starts_with(ns) {
+                    if self.data[start + ns.len()] == 0 {
+                        return start;
+                    }
+                }
+            }
+        }
 
         // No spot for ns, insert it (and the null terminator) at the end.
+        self.insert_unchecked(ns)
+    }
+
+    /// Insert into string table without checking for duplicates
+    pub fn insert_unchecked(&mut self, ns: &[u8]) -> usize {
         let i = self.data.len();
         self.data.extend(ns);
         self.data.push(0);
